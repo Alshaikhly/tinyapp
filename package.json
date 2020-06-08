@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Alshaikhly/tinyapp/issues"
   },
-  "homepage": "https://github.com/Alshaikhly/tinyapp#readme"
+  "homepage": "https://github.com/Alshaikhly/tinyapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
