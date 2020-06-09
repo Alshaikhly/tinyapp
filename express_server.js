@@ -6,8 +6,12 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
 
 function generateRandomString() {
-  const randomString = Math.random().toString(36).substring(2, 5) + Math.random().toString(36).substring(2, 5)
-  return randomString;
+  let result           = '';
+  const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < 6; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+   }
+   return result;
 }
 console.log(generateRandomString());
 const urlDatabase = {
@@ -33,7 +37,9 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
+  let newRandomString = generateRandomString();
+  urlDatabase[newRandomString] = req.body.longURL;  // Log the POST request body to the console
+  console.log(urlDatabase);
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
