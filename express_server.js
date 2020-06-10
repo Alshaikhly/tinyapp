@@ -14,7 +14,7 @@ const generateRandomString = function() {
   return result;
 };
 
-const urlDatabase = {
+let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -36,6 +36,17 @@ app.post("/urls/:shortURL/delete", (req, res) =>{
   const urlToDelete = req.params.shortURL;
   delete urlDatabase[urlToDelete]
   res.redirect("/urls");
+})
+
+app.post("/urls/:shortURL/edit", (req, res) =>{
+  const redirect = req.params.shortURL
+  res.redirect(`/urls/${redirect}`);
+})
+
+app.post("/urls/:shortURL", (req, res) =>{
+  //let long = urlDatabase[req.params.shortURL]
+  urlDatabase[req.params.shortURL] = req.body.Newurl;
+  res.redirect('/urls');
 })
 
 app.get("/urls/new", (req, res) => {
