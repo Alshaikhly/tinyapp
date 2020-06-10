@@ -4,6 +4,7 @@ const PORT = 8080;
 const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
+//app.use(cookie-Parser());
 
 const generateRandomString = function() {
   let result           = '';
@@ -31,6 +32,11 @@ app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
+
+app.post("/login", (req, res) => {
+  res.cookie('username', req.body.username)
+  res.redirect("/urls")
+})
 
 app.post("/urls/:shortURL/delete", (req, res) =>{
   const urlToDelete = req.params.shortURL;
