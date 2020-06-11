@@ -24,6 +24,22 @@ const generateRandomString = function() {
   return result;
 };
 
+const userLookup = email => {
+  for (const id in users) {
+    if (users[id].email === email) {
+      return id; 
+    }
+  }
+};
+
+const passwordLookup = password => {
+  for (const id in users) {
+    if (users[id].password === password) {
+      return id;
+    }
+  }
+}
+
 let urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -81,14 +97,6 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
-const userLookup = email => {
-  for (const id in users) {
-    if (users[id].email === email) {
-      return true; 
-    }
-  }
-}
-
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
@@ -113,14 +121,26 @@ app.post("/register", (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-  res.cookie('user_Id', req.body.user_Id)
-  res.redirect("/urls")
-})
-app.post("/logout", (req, res) => {
-  res.clearCookie('user_Id', req.body.userId)
-  res.redirect("/urls")
+  const email = req.body.email;
+  const password = req.body.password;
+  const id = req.cookies.user_Id
+  if (email === '' || password === '') {
+    return res.status(400).send('Please fill out the empty fields');
+  }
+
+  if (!userLookup(email) || (!passwordLookup(password))) {
+    return res.status(403).send('Sorry the email or password are not correct, try again or try to register')
+  } else {
+    userId = userLookup(email)
+    res.cookie("user_Id", userId);
+    res.redirect("/urls");
+  }
 })
 
+app.post("/logout", (req, res) => {
+  res.clearCookie('user_Id')
+  res.redirect("/urls")
+});
 app.post("/urls/:shortURL/delete", (req, res) =>{
   const urlToDelete = req.params.shortURL;
   delete urlDatabase[urlToDelete]
