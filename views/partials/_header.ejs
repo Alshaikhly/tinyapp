@@ -8,6 +8,7 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+      </div>
         <% if (user) { %>
           <form class="form-inline" action="/logout" method="POST"> 
             <div style = "position:relative; left:630px; top:2px">
@@ -15,14 +16,9 @@
               <button type="submit" class="btn btn-primary">Logout</button>
             </div>
           </form>
-        <% } else { %>      
-        <form class="form-inline" action="/login" method="POST"> 
-          <div style = "position:relative; left:830px; top:2px">
-            <input class="form-control" type="text" name="username" placeholder="username" style="width: 200px">
-            <button type="submit" class="btn btn-primary">Login</button>
-            <% } %>
-          </div>
-          </form>
-    </div>
+        <% } else { %>  
+          <a href="/register"><button type="button" style = "position:relative; left:790px;" class="btn btn-primary btn-lg">Register</button></a>
+            <a href="/login"><button type="button" style = "position:relative; left:800px;" action="/login" method="GET" class="btn btn-primary btn-lg">Login</button></a>
+        <% } %>
   </nav>
 </header>

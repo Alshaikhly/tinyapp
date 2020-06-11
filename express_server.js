@@ -113,7 +113,7 @@ app.post("/register", (req, res) => {
 })
 
 app.post("/login", (req, res) => {
-  res.cookie('user_Id', req.body.username)
+  res.cookie('user_Id', req.body.user_Id)
   res.redirect("/urls")
 })
 app.post("/logout", (req, res) => {
