@@ -8,13 +8,24 @@ app.set('view engine', 'ejs');
 app.use(cookieParser());
 
 const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
+  "aJ48lW": {
+    id: "aJ48lW", 
     email: "user@example.com", 
     password: "purple-monkey-dinosaur"
   }
 }
 
+const getUrlsByUserId = Id => {
+  let returunUrl = {};
+
+  for (const shortUrl in urlDatabase) {
+    const shortUrlObj = urlDatabase[shortUrl];
+    if (shortUrlObj.userID === Id) {
+      returunUrl[shortUrl] = shortUrlObj
+    }
+  }
+  return returunUrl;
+}
 const generateRandomString = function() {
   let result           = '';
   const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -40,9 +51,13 @@ const passwordLookup = password => {
   }
 }
 
+// let urlDatabase1 = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 let urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
+  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
 };
 
 app.get('/', (req, res) => {
@@ -56,7 +71,9 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_Id = req.cookies.user_Id;
   const user = users[user_Id];
-  let templateVars = { urls: urlDatabase, user };
+  // console.log("user id =", user);
+  let templateVars = { urls: getUrlsByUserId(user_Id), user};
+  // console.log(templateVars.urls);
   res.render('urls_index', templateVars);
 });
 
@@ -159,7 +176,12 @@ app.post("/urls/:shortURL", (req, res) =>{
 
 app.post("/urls", (req, res) => {
   let newRandomString = generateRandomString();
-  urlDatabase[newRandomString] = req.body.longURL;
+  const longURL = req.body.longURL
+  const userID = req.cookies.user_Id
+  urlDatabase[newRandomString] = {longURL, userID};
+  // console.log("req.body.user_Id>>", req.body.longURL);
+  // console.log(urlDatabase[newRandomString]);
+  // console.log(urlDatabase);
   res.redirect(`/urls/${newRandomString}`);
 });
 
