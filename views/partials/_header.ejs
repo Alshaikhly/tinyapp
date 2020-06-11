@@ -8,12 +8,13 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <form class="form-inline">
         <% if (user) { %>
           <form class="form-inline" action="/logout" method="POST"> 
-            <div style = "position:relative; left:500px; top:2px">
-              <h3>Logged In As <%= user.email %></h3>
+            <div style = "position:relative; left:630px; top:2px">
+              <h4>Logged In As <%= user.email %></h4>
               <button type="submit" class="btn btn-primary">Logout</button>
+            </div>
+          </form>
         <% } else { %>      
         <form class="form-inline" action="/login" method="POST"> 
           <div style = "position:relative; left:830px; top:2px">
@@ -21,8 +22,6 @@
             <button type="submit" class="btn btn-primary">Login</button>
             <% } %>
           </div>
-        </form>
-      </div>
           </form>
     </div>
   </nav>

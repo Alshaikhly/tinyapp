@@ -74,26 +74,43 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+const userLookup = email => {
+  for (const id in users) {
+    if (users[id].email === email) {
+      return true; 
+    }
+  }
+}
+
 app.post("/register", (req, res) => {
-  const userId = generateRandomString()
   const email = req.body.email;
   const password = req.body.password;
-  const newUser = {
-    id: userId,
-    email,
-    password
+  if (email === '' || password === '') {
+    return res.status(400).send('Please fill out the empty fields');
   }
-  users[userId] = newUser;
-  res.cookie("user_Id", userId);
-  res.redirect("/urls");
+
+  if(userLookup(email)){
+    return res.status(400).send('The email already exists');
+  } else {
+    const userId = generateRandomString()
+    const newUser = {
+      id: userId,
+      email,
+      password
+    }
+    users[userId] = newUser;
+    res.cookie("user_Id", userId);
+    res.redirect("/urls");
+  }
+  
 })
 
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username)
+  res.cookie('user_Id', req.body.username)
   res.redirect("/urls")
 })
 app.post("/logout", (req, res) => {
-  res.clearCookie('username', req.body.username)
+  res.clearCookie('user_Id', req.body.userId)
   res.redirect("/urls")
 })
 
