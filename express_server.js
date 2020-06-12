@@ -3,10 +3,10 @@ const app = express();
 const bcrypt = require('bcrypt');
 const PORT = 8080;
 const bodyParser = require('body-parser');
+const helpers = require('./helpers')
 var cookieSession = require('cookie-session')
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
-
 app.use(cookieSession({
   name: 'session',
   keys: ['f080ac7b-b838-4c5f-a1f4-b0a9fee10130', 'c3fb18be-448b-4f6e-a377-49373e9b7e1a'],
@@ -20,7 +20,7 @@ const users = {
 }
 
 const addNewUser = (email, password) => {
-  const userId = generateRandomString()
+  const userId = helpers.generateRandomString()
     const newUser = {
       id: userId,
       email,
@@ -33,7 +33,7 @@ const addNewUser = (email, password) => {
 };
 
 const checkUserLogin = (email, password) => {
-  const user = userEmailLookup(email)
+  const user = helpers.userEmailLookup(email, users)
   console.log(user);
   if (user && bcrypt.compareSync(password, user.password)) {
     return user;
@@ -51,39 +51,6 @@ const getUrlsByUserId = Id => {
     }
   }
   return returunUrl;
-}
-
-const matchUserId = (id, ownerId) => {
-   if (id === ownerId) {
-    return true
-  }
-  return false
-}
-
-const generateRandomString = function() {
-  let result           = '';
-  const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (let i = 0; i < 6; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-};
-
-const userEmailLookup = (email) => {
-  for (let id in users) {
-    if (users[id].email === email) {
-       return users[id];
-    } 
-  }
-  return false;
-}
-
-const passwordLookup = password => {
-  for (const id in users) {
-    if (users[id].password === password) {
-      return id;
-    }
-  }
 }
 
 let urlDatabase = {
@@ -134,7 +101,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const posterId = idObj.userID
   const redirect = req.params.shortURL
   
-  if (!matchUserId(user_Id, posterId)) {
+  if (!helpers.matchUserId(user_Id, posterId)) {
     res.status(403).send('You are not allowed to to edit this URL');
   }
   const shortURL = req.params.shortURL
@@ -156,7 +123,7 @@ app.get("/hello", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const user = userEmailLookup(email);
+  const user = helpers.userEmailLookup(email, users);
 
   if (email === '' || password === '') {
     return res.status(400).send('Please fill out the empty fields');
@@ -166,7 +133,6 @@ app.post("/register", (req, res) => {
     return res.status(400).send('The account already exists');
   } else {
     userId = addNewUser(email, password);
-    // console.log(users);
     req.session.user_Id = userId;
     res.redirect("/urls");
   }
@@ -200,7 +166,7 @@ app.post("/urls/:shortURL/delete", (req, res) =>{
   const posterId = idObj.userID
   const shortURL = req.params.shortURL
   
-  if (!matchUserId(user_Id, posterId)) {
+  if (!helpers.matchUserId(user_Id, posterId)) {
     res.status(403).send('You are not allowed to to edit this URL');
   }
   delete urlDatabase[shortURL]
@@ -213,7 +179,7 @@ app.post("/urls/:shortURL/edit", (req, res) =>{
   const posterId = idObj.userID
   const redirect = req.params.shortURL
   
-  if (!matchUserId(user_Id, posterId)) {
+  if (!helpers.matchUserId(user_Id, posterId)) {
     res.status(403).send('You are not allowed to to edit this URL');
   }
   res.redirect(`/urls/${redirect}`);
@@ -226,13 +192,10 @@ app.post("/urls/:shortURL", (req, res) =>{
 })
 
 app.post("/urls", (req, res) => {
-  let newRandomString = generateRandomString();
+  let newRandomString = helpers.generateRandomString();
   const longURL = req.body.longURL
   const userID = req.session.user_Id
   urlDatabase[newRandomString] = {longURL, userID};
-  // console.log("req.body.user_Id>>", req.body.longURL);
-  // console.log(urlDatabase[newRandomString]);
-  // console.log(urlDatabase);
   res.redirect(`/urls/${newRandomString}`);
 });
 
