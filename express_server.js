@@ -3,11 +3,14 @@ const app = express();
 const bcrypt = require('bcrypt');
 const PORT = 8080;
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser')
+var cookieSession = require('cookie-session')
 app.use(bodyParser.urlencoded({extended: true}));
 app.set('view engine', 'ejs');
-app.use(cookieParser());
 
+app.use(cookieSession({
+  name: 'session',
+  keys: ['f080ac7b-b838-4c5f-a1f4-b0a9fee10130', 'c3fb18be-448b-4f6e-a377-49373e9b7e1a'],
+}))
 const users = { 
   "aJ48lW": {
     id: "aJ48lW", 
@@ -97,35 +100,35 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const user_Id = req.cookies.user_Id;
+  const user_Id = req.session.user_Id;
   const user = users[user_Id];
   let templateVars = { urls: getUrlsByUserId(user_Id), user};
   res.render('urls_index', templateVars);
 });
 
 app.get("/register", (req, res) => {
-  const user_Id = req.cookies.user_Id;
+  const user_Id = req.session.user_Id;
   const user = users[user_Id];
   let templateVars = { user }
   res.render("urls_registration", templateVars )
 });
 
 app.get("/login", (req, res) => {
-  const user_Id = req.cookies.user_Id;
+  const user_Id = req.session.user_Id;
   const user = users[user_Id];
   let templateVars = { user }
   res.render("urls_login", templateVars)
 })
 
 app.get("/urls/new", (req, res) => {
-  const user_Id = req.cookies.user_Id;
+  const user_Id = req.session.user_Id;
   const user = users[user_Id];
   let templateVars = { urls: urlDatabase, user }
   res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const user_Id = req.cookies.user_Id;
+  const user_Id = req.session.user_Id;
   const user = users[user_Id];
   const idObj = urlDatabase[req.params.shortURL]
   const posterId = idObj.userID
@@ -164,7 +167,7 @@ app.post("/register", (req, res) => {
   } else {
     userId = addNewUser(email, password);
     // console.log(users);
-    res.cookie("user_Id", userId);
+    req.session.user_Id = userId;
     res.redirect("/urls");
   }
 });
@@ -182,17 +185,17 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Sorry the email or password are not correct, try again or try to register')
   } else {
     userId = user.id
-    res.cookie("user_Id", userId);
+    res.session.user_Id = userId;
     res.redirect("/urls");
   }
 })
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('user_Id')
+  req.session.user_Id = null;
   res.redirect("/urls")
 });
 app.post("/urls/:shortURL/delete", (req, res) =>{
-  const user_Id = req.cookies.user_Id
+  const user_Id = req.session.user_Id
   const idObj = urlDatabase[req.params.shortURL]
   const posterId = idObj.userID
   const shortURL = req.params.shortURL
@@ -205,7 +208,7 @@ app.post("/urls/:shortURL/delete", (req, res) =>{
 })
 
 app.post("/urls/:shortURL/edit", (req, res) =>{
-  const user_Id = req.cookies.user_Id
+  const user_Id = req.session.user_Id
   const idObj = urlDatabase[req.params.shortURL]
   const posterId = idObj.userID
   const redirect = req.params.shortURL
@@ -225,7 +228,7 @@ app.post("/urls/:shortURL", (req, res) =>{
 app.post("/urls", (req, res) => {
   let newRandomString = generateRandomString();
   const longURL = req.body.longURL
-  const userID = req.cookies.user_Id
+  const userID = req.session.user_Id
   urlDatabase[newRandomString] = {longURL, userID};
   // console.log("req.body.user_Id>>", req.body.longURL);
   // console.log(urlDatabase[newRandomString]);
