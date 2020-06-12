@@ -24,7 +24,7 @@ const addNewUser = (email, password) => {
     const newUser = {
       id: userId,
       email,
-      Password: bcrypt.hashSync(password, 10)
+      password: bcrypt.hashSync(password, 10)
     };
 
     users[userId] = newUser;
@@ -34,8 +34,8 @@ const addNewUser = (email, password) => {
 
 const checkUserLogin = (email, password) => {
   const user = helpers.userEmailLookup(email, users)
-  console.log(user);
-  if (user && bcrypt.compareSync(password, user.password)) {
+  console.log("current user object >>", user)
+  if (bcrypt.compareSync(password, user.password)) {
     return user;
   } else {
     return false;
@@ -151,7 +151,7 @@ app.post("/login", (req, res) => {
     return res.status(403).send('Sorry the email or password are not correct, try again or try to register')
   } else {
     userId = user.id
-    res.session.user_Id = userId;
+    req.session.user_Id = userId;
     res.redirect("/urls");
   }
 })
