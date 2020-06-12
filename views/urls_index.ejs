@@ -24,6 +24,7 @@
           <th scope="col">Delete</th>
         </tr>
       </thead>
+      <% if (user) { %>
       <tbody>
         <% for(let url in urls) { %>
           <tr>
@@ -37,7 +38,9 @@
         </td>
         </tr>
           <% } %>
-        
+        <% } else { %>
+          <h4>Please <a href="/login">sign in </a>to view your shortened URLs or <a href="/register">register</a> to enjoy our full services</h4>
+          <% } %>
       </tbody>
     </table>
   </main>

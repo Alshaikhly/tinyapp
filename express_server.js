@@ -26,6 +26,14 @@ const getUrlsByUserId = Id => {
   }
   return returunUrl;
 }
+
+const matchUserId = (id, ownerId) => {
+   if (id === ownerId) {
+    return true
+  }
+  return false
+}
+
 const generateRandomString = function() {
   let result           = '';
   const characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -71,9 +79,7 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_Id = req.cookies.user_Id;
   const user = users[user_Id];
-  // console.log("user id =", user);
   let templateVars = { urls: getUrlsByUserId(user_Id), user};
-  // console.log(templateVars.urls);
   res.render('urls_index', templateVars);
 });
 
@@ -101,12 +107,22 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const user_Id = req.cookies.user_Id;
   const user = users[user_Id];
-  let templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], user };
+  const idObj = urlDatabase[req.params.shortURL]
+  const posterId = idObj.userID
+  const redirect = req.params.shortURL
+  
+  if (!matchUserId(user_Id, posterId)) {
+    res.status(403).send('You are not allowed to to edit this URL');
+  }
+  const shortURL = req.params.shortURL
+  const longURL = urlDatabase[shortURL].longURL
+  let templateVars = { shortURL, longURL, user };
   res.render('urls_show', templateVars);
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL
   res.redirect(longURL);
 });
 
@@ -159,18 +175,33 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls")
 });
 app.post("/urls/:shortURL/delete", (req, res) =>{
-  const urlToDelete = req.params.shortURL;
-  delete urlDatabase[urlToDelete]
+  const user_Id = req.cookies.user_Id
+  const idObj = urlDatabase[req.params.shortURL]
+  const posterId = idObj.userID
+  const shortURL = req.params.shortURL
+  
+  if (!matchUserId(user_Id, posterId)) {
+    res.status(403).send('You are not allowed to to edit this URL');
+  }
+  delete urlDatabase[shortURL]
   res.redirect("/urls");
 })
 
 app.post("/urls/:shortURL/edit", (req, res) =>{
+  const user_Id = req.cookies.user_Id
+  const idObj = urlDatabase[req.params.shortURL]
+  const posterId = idObj.userID
   const redirect = req.params.shortURL
+  
+  if (!matchUserId(user_Id, posterId)) {
+    res.status(403).send('You are not allowed to to edit this URL');
+  }
   res.redirect(`/urls/${redirect}`);
 })
 
 app.post("/urls/:shortURL", (req, res) =>{
-  urlDatabase[req.params.shortURL] = req.body.Newurl;
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL].longURL = req.body.Newurl;
   res.redirect('/urls');
 })
 
