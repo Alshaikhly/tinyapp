@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const bcrypt = require('bcrypt');
 const PORT = 8080;
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser')
@@ -11,10 +12,32 @@ const users = {
   "aJ48lW": {
     id: "aJ48lW", 
     email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync('cookinglessons', 10)
   }
 }
 
+const addNewUser = (email, password) => {
+  const userId = generateRandomString()
+    const newUser = {
+      id: userId,
+      email,
+      Password: bcrypt.hashSync(password, 10)
+    };
+
+    users[userId] = newUser;
+
+    return userId;
+};
+
+const checkUserLogin = (email, password) => {
+  const user = userEmailLookup(email)
+  console.log(user);
+  if (user && bcrypt.compareSync(password, user.password)) {
+    return user;
+  } else {
+    return false;
+  }
+};
 const getUrlsByUserId = Id => {
   let returunUrl = {};
 
@@ -43,13 +66,14 @@ const generateRandomString = function() {
   return result;
 };
 
-const userLookup = email => {
-  for (const id in users) {
+const userEmailLookup = (email) => {
+  for (let id in users) {
     if (users[id].email === email) {
-      return id; 
-    }
+       return users[id];
+    } 
   }
-};
+  return false;
+}
 
 const passwordLookup = password => {
   for (const id in users) {
@@ -59,10 +83,6 @@ const passwordLookup = password => {
   }
 }
 
-// let urlDatabase1 = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 let urlDatabase = {
   b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
   i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
@@ -133,38 +153,35 @@ app.get("/hello", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const user = userEmailLookup(email);
+
   if (email === '' || password === '') {
     return res.status(400).send('Please fill out the empty fields');
   }
 
-  if(userLookup(email)){
-    return res.status(400).send('The email already exists');
+  if(user){
+    return res.status(400).send('The account already exists');
   } else {
-    const userId = generateRandomString()
-    const newUser = {
-      id: userId,
-      email,
-      password
-    }
-    users[userId] = newUser;
+    userId = addNewUser(email, password);
+    // console.log(users);
     res.cookie("user_Id", userId);
     res.redirect("/urls");
   }
-  
-})
+});
 
 app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  const id = req.cookies.user_Id
+  const user = checkUserLogin(email, password);
+
   if (email === '' || password === '') {
     return res.status(400).send('Please fill out the empty fields');
   }
 
-  if (!userLookup(email) || (!passwordLookup(password))) {
+  if (!user) {
     return res.status(403).send('Sorry the email or password are not correct, try again or try to register')
   } else {
-    userId = userLookup(email)
+    userId = user.id
     res.cookie("user_Id", userId);
     res.redirect("/urls");
   }
