@@ -1,6 +1,6 @@
 # TinyApp Project
 
-TinyApp is a web application that allows users to create short URLs for the long URLs htye have.
+TinyApp is a web application that allows users to create short URLs for the long URLs they have.
 It makes it easier to share those URLs into limited-character social media posts.
 
 ## Build
@@ -24,5 +24,5 @@ TinyApp is a full stack web application built with Node and Express.
 
 ## Getting Started
 
-- Install all dependencies (using the `npm install` command).
+- Install all dependencies (using the `npm install` command). ** make sure you have Node v12.13.0 as the app was tested with this version and works well
 - Run the development web server using the `node express_server.js` command.
